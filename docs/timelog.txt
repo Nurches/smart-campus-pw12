@@ -3,3 +3,7 @@ setup (folders, tooling check): 12:05 - 12:05 (~1 min)
 implementation (4 source files + index.html): 12:05 - 12:06 (~1-2 min)
 testing (node suite + browser UI checks, screenshots): 12:06 - 12:07 (~1-2 min)
 debugging: 0 min (no failing test)
+LOWCODE setup_start 12:21:26
+LOWCODE impl_end 12:26:39
+LOWCODE tests_end 12:27:52 (T1-T7 + XSS pass in preview; debugging 0 defects in rules; UI fiddling counted in impl)
+LOWCODE defect D1 (stale persisted result via storeValue default persist=true) found ~12:30, fixed+redeployed+verified 12:30:23
