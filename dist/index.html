@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Campus Room Availability Checker — code-based (PW #12)</title>
+<style>
+  :root { --ink:#1d2433; --muted:#5b6475; --line:#d9dee7; --bg:#f6f7fa; --ok:#1f7a45; --okbg:#e6f4ec; --no:#a12a2a; --nobg:#fbe9e9; --err:#8a5a00; --errbg:#fff4dc; --accent:#2f5bd3; }
+  * { box-sizing: border-box; }
+  body { margin:0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.45rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:16px; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; }
+  form { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  label { display:block; font-weight:600; font-size:.92rem; margin-bottom:4px; }
+  input[type=datetime-local], input[type=text] { width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; }
+  .check { grid-column: 1 / -1; display:flex; align-items:center; gap:8px; }
+  .check label { margin:0; font-weight:500; }
+  .hint { color:var(--muted); font-size:.82rem; margin-top:3px; }
+  button { grid-column: 1 / -1; padding:12px; border:0; border-radius:8px; background:var(--accent); color:#fff; font:inherit; font-weight:600; cursor:pointer; }
+  .result { border-radius:10px; padding:16px; margin-bottom:16px; border:1px solid; }
+  .result.ok { background:var(--okbg); border-color:var(--ok); color:var(--ok); }
+  .result.no { background:var(--nobg); border-color:var(--no); color:var(--no); }
+  .result.err { background:var(--errbg); border-color:var(--err); color:var(--err); }
+  .result strong { font-size:1.2rem; display:block; }
+  .result p { margin:4px 0 0; color:var(--ink); }
+  .code { font-family: ui-monospace, Menlo, monospace; font-size:.8rem; color:var(--muted); }
+  table { width:100%; border-collapse: collapse; font-size:.92rem; }
+  th, td { text-align:left; padding:7px 6px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; }
+  footer { color:var(--muted); font-size:.8rem; }
+  @media (max-width: 560px) {
+    form { grid-template-columns: 1fr; }
+    th:nth-child(4), td:nth-child(4) { display:none; }
+    h1 { font-size: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Smart Campus Room Availability Checker</h1>
+  <p class="sub">Code-based track · Practice Work #12 · <span id="room-name"></span></p>
+
+  <section class="card">
+    <h2>Check a time slot</h2>
+    <form id="check-form" novalidate>
+      <div>
+        <label for="start">Start time</label>
+        <input id="start" type="datetime-local" step="60">
+        <div class="hint">Must be in the future.</div>
+      </div>
+      <div>
+        <label for="duration">Duration (minutes)</label>
+        <input id="duration" type="text" inputmode="numeric" placeholder="e.g. 60">
+        <div class="hint">1–120 minutes.</div>
+      </div>
+      <div class="check">
+        <input id="blocked" type="checkbox">
+        <label for="blocked">Room is blocked (room status)</label>
+      </div>
+      <button type="submit">Check availability</button>
+    </form>
+  </section>
+
+  <section id="result" class="result" hidden aria-live="polite">
+    <strong id="result-title"></strong>
+    <p id="result-message"></p>
+    <div id="result-code" class="code"></div>
+  </section>
+
+  <section class="card">
+    <h2>Existing bookings (read-only, <span id="bookings-count"></span> rows)</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Start</th><th>End</th><th>Title</th></tr></thead>
+      <tbody id="bookings-body"></tbody>
+    </table>
+  </section>
+
+  <footer>Fictional data only. No login, no personal data, no database. Checking never changes the bookings.</footer>
+</main>
+<script>/* src/bookings.js */
+// Fictional booking data for the single Smart Campus room (no real personal data).
+// Times are local campus time (Asia/Almaty). This list is read-only: the checker never changes it.
+(function (root) {
+  'use strict';
+
+  var ROOM = Object.freeze({ id: 'A101', name: 'Smart Campus Room A101 (fictional)' });
+
+  var BOOKINGS = Object.freeze([
+    Object.freeze({ id: 'B1', start: '2026-12-15T09:00', end: '2026-12-15T10:00', title: 'Study group (fictional)' }),
+    Object.freeze({ id: 'B2', start: '2026-12-15T13:00', end: '2026-12-15T14:30', title: 'Club meeting (fictional)' }),
+    Object.freeze({ id: 'B3', start: '2026-12-16T11:00', end: '2026-12-16T12:00', title: 'Tutoring (fictional)' })
+  ]);
+
+  var api = { ROOM: ROOM, BOOKINGS: BOOKINGS };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.SC = Object.assign(root.SC || {}, api);
+})(this);
+</script>
+<script>/* src/validation.js */
+// Input validation layer (AC1, AC2, AC6). Pure functions, no DOM access.
+(function (root) {
+  'use strict';
+
+  var MAX_DURATION_MIN = 120;
+  var LOCAL_DT = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
+
+  // Parses "YYYY-MM-DDTHH:MM" as local time. Returns Date or null.
+  function parseLocal(value) {
+    if (typeof value !== 'string') return null;
+    var m = LOCAL_DT.exec(value.trim());
+    if (!m) return null;
+    var y = +m[1], mo = +m[2], d = +m[3], h = +m[4], mi = +m[5];
+    if (mo < 1 || mo > 12 || d < 1 || d > 31 || h > 23 || mi > 59) return null;
+    var dt = new Date(y, mo - 1, d, h, mi, 0, 0);
+    // Reject roll-over dates such as 2026-02-31.
+    if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+    return dt;
+  }
+
+  // Returns { ok: true, start: Date, durationMin: number } or
+  //         { ok: false, reasonCode: string, message: string }.
+  function validateRequest(input, now) {
+    var startRaw = input && input.start;
+    var durRaw = input && input.durationMin;
+
+    if (startRaw === undefined || startRaw === null || String(startRaw).trim() === '') {
+      return fail('INVALID_START', 'Please choose a start date and time.');
+    }
+    var start = parseLocal(String(startRaw));
+    if (!start) {
+      return fail('INVALID_START', 'Start time is not a valid date and time (use YYYY-MM-DD HH:MM).');
+    }
+    if (durRaw === undefined || durRaw === null || String(durRaw).trim() === '') {
+      return fail('INVALID_DURATION', 'Please enter a duration in minutes.');
+    }
+    var durStr = String(durRaw).trim();
+    if (!/^-?\d+$/.test(durStr)) {
+      return fail('INVALID_DURATION', 'Duration must be a whole number of minutes.');
+    }
+    var duration = parseInt(durStr, 10);
+    if (duration <= 0 || duration > MAX_DURATION_MIN) {
+      return fail('DURATION_OUT_OF_RANGE',
+        'Duration must be greater than 0 and at most ' + MAX_DURATION_MIN + ' minutes (you entered ' + duration + ').');
+    }
+    if (!(now instanceof Date) || isNaN(now.getTime())) {
+      throw new Error('validateRequest: "now" must be a valid Date');
+    }
+    if (start.getTime() <= now.getTime()) {
+      return fail('START_NOT_IN_FUTURE', 'Start time must be in the future.');
+    }
+    return { ok: true, start: start, durationMin: duration };
+  }
+
+  function fail(code, message) {
+    return { ok: false, reasonCode: code, message: message };
+  }
+
+  var api = { MAX_DURATION_MIN: MAX_DURATION_MIN, parseLocal: parseLocal, validateRequest: validateRequest };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.SC = Object.assign(root.SC || {}, api);
+})(this);
+</script>
+<script>/* src/availability.js */
+// Availability calculation layer (AC3, AC4, AC5). Pure, deterministic, never mutates bookings.
+(function (root) {
+  'use strict';
+
+  var V = (typeof module !== 'undefined' && module.exports) ? require('./validation.js') : root.SC;
+
+  // Half-open intervals [start, end): touching endpoints do not overlap.
+  function overlaps(aStart, aEnd, bStart, bEnd) {
+    return aStart < bEnd && bStart < aEnd;
+  }
+
+  function fmtTime(d) {
+    return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  // input: { start: "YYYY-MM-DDTHH:MM", durationMin: number|string, blocked: boolean }
+  // returns { available: boolean|null, reasonCode: string, message: string }
+  //   available === null means the request was rejected by validation (no decision made).
+  function checkAvailability(input, bookings, now) {
+    var v = V.validateRequest(input, now);
+    if (!v.ok) return { available: null, reasonCode: v.reasonCode, message: v.message };
+
+    if (input.blocked === true) {
+      return { available: false, reasonCode: 'ROOM_BLOCKED', message: 'Unavailable: the room is blocked and cannot be booked.' };
+    }
+
+    var reqStart = v.start.getTime();
+    var reqEnd = reqStart + v.durationMin * 60000;
+
+    for (var i = 0; i < bookings.length; i++) {
+      var b = bookings[i];
+      var bs = V.parseLocal(b.start), be = V.parseLocal(b.end);
+      if (!bs || !be) continue; // malformed fixture rows are ignored, never "fixed"
+      if (overlaps(reqStart, reqEnd, bs.getTime(), be.getTime())) {
+        return {
+          available: false,
+          reasonCode: 'OVERLAP',
+          message: 'Unavailable: overlaps existing booking ' + b.id + ' (' + fmtTime(bs) + '–' + fmtTime(be) + ').'
+        };
+      }
+    }
+    var endDate = new Date(reqEnd);
+    return {
+      available: true,
+      reasonCode: 'AVAILABLE',
+      message: 'Available: the room is free from ' + fmtTime(v.start) + ' to ' + fmtTime(endDate) + '.'
+    };
+  }
+
+  var api = { overlaps: overlaps, checkAvailability: checkAvailability };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.SC = Object.assign(root.SC || {}, api);
+})(this);
+</script>
+<script>/* src/ui.js */
+// Presentation layer: reads the form, calls the rule engine, renders the result.
+// Uses textContent only (no innerHTML with user data) to avoid XSS.
+(function (root) {
+  'use strict';
+  var SC = root.SC;
+
+  function $(id) { return document.getElementById(id); }
+
+  function renderBookings() {
+    $('room-name').textContent = SC.ROOM.name;
+    var tbody = $('bookings-body');
+    tbody.textContent = '';
+    SC.BOOKINGS.forEach(function (b) {
+      var tr = document.createElement('tr');
+      [b.id, b.start.replace('T', ' '), b.end.slice(11), b.title].forEach(function (v) {
+        var td = document.createElement('td');
+        td.textContent = v;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    $('bookings-count').textContent = String(SC.BOOKINGS.length);
+  }
+
+  function showResult(res) {
+    var box = $('result');
+    box.className = 'result ' + (res.available === true ? 'ok' : res.available === false ? 'no' : 'err');
+    $('result-title').textContent =
+      res.available === true ? 'Available' : res.available === false ? 'Unavailable' : 'Please fix the input';
+    $('result-message').textContent = res.message;
+    $('result-code').textContent = 'reason code: ' + res.reasonCode;
+    box.hidden = false;
+  }
+
+  function onSubmit(ev) {
+    ev.preventDefault();
+    var input = {
+      start: $('start').value,
+      durationMin: $('duration').value,
+      blocked: $('blocked').checked
+    };
+    var res = SC.checkAvailability(input, SC.BOOKINGS, new Date());
+    showResult(res);
+    $('bookings-count').textContent = String(SC.BOOKINGS.length);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    renderBookings();
+    $('check-form').addEventListener('submit', onSubmit);
+  });
+})(this);
+</script>
+</body>
+</html>

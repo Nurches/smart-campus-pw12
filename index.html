@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Campus Room Availability Checker — code-based (PW #12)</title>
+<style>
+  :root { --ink:#1d2433; --muted:#5b6475; --line:#d9dee7; --bg:#f6f7fa; --ok:#1f7a45; --okbg:#e6f4ec; --no:#a12a2a; --nobg:#fbe9e9; --err:#8a5a00; --errbg:#fff4dc; --accent:#2f5bd3; }
+  * { box-sizing: border-box; }
+  body { margin:0; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
+  h1 { font-size: 1.45rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: .95rem; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:16px; }
+  h2 { font-size: 1.05rem; margin: 0 0 12px; }
+  form { display:grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  label { display:block; font-weight:600; font-size:.92rem; margin-bottom:4px; }
+  input[type=datetime-local], input[type=text] { width:100%; padding:10px; border:1px solid var(--line); border-radius:8px; font:inherit; }
+  .check { grid-column: 1 / -1; display:flex; align-items:center; gap:8px; }
+  .check label { margin:0; font-weight:500; }
+  .hint { color:var(--muted); font-size:.82rem; margin-top:3px; }
+  button { grid-column: 1 / -1; padding:12px; border:0; border-radius:8px; background:var(--accent); color:#fff; font:inherit; font-weight:600; cursor:pointer; }
+  .result { border-radius:10px; padding:16px; margin-bottom:16px; border:1px solid; }
+  .result.ok { background:var(--okbg); border-color:var(--ok); color:var(--ok); }
+  .result.no { background:var(--nobg); border-color:var(--no); color:var(--no); }
+  .result.err { background:var(--errbg); border-color:var(--err); color:var(--err); }
+  .result strong { font-size:1.2rem; display:block; }
+  .result p { margin:4px 0 0; color:var(--ink); }
+  .code { font-family: ui-monospace, Menlo, monospace; font-size:.8rem; color:var(--muted); }
+  table { width:100%; border-collapse: collapse; font-size:.92rem; }
+  th, td { text-align:left; padding:7px 6px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; }
+  footer { color:var(--muted); font-size:.8rem; }
+  @media (max-width: 560px) {
+    form { grid-template-columns: 1fr; }
+    th:nth-child(4), td:nth-child(4) { display:none; }
+    h1 { font-size: 1.25rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Smart Campus Room Availability Checker</h1>
+  <p class="sub">Code-based track · Practice Work #12 · <span id="room-name"></span></p>
+
+  <section class="card">
+    <h2>Check a time slot</h2>
+    <form id="check-form" novalidate>
+      <div>
+        <label for="start">Start time</label>
+        <input id="start" type="datetime-local" step="60">
+        <div class="hint">Must be in the future.</div>
+      </div>
+      <div>
+        <label for="duration">Duration (minutes)</label>
+        <input id="duration" type="text" inputmode="numeric" placeholder="e.g. 60">
+        <div class="hint">1–120 minutes.</div>
+      </div>
+      <div class="check">
+        <input id="blocked" type="checkbox">
+        <label for="blocked">Room is blocked (room status)</label>
+      </div>
+      <button type="submit">Check availability</button>
+    </form>
+  </section>
+
+  <section id="result" class="result" hidden aria-live="polite">
+    <strong id="result-title"></strong>
+    <p id="result-message"></p>
+    <div id="result-code" class="code"></div>
+  </section>
+
+  <section class="card">
+    <h2>Existing bookings (read-only, <span id="bookings-count"></span> rows)</h2>
+    <table>
+      <thead><tr><th>ID</th><th>Start</th><th>End</th><th>Title</th></tr></thead>
+      <tbody id="bookings-body"></tbody>
+    </table>
+  </section>
+
+  <footer>Fictional data only. No login, no personal data, no database. Checking never changes the bookings.</footer>
+</main>
+<!--SCRIPTS-->
+<script src="src/bookings.js"></script>
+<script src="src/validation.js"></script>
+<script src="src/availability.js"></script>
+<script src="src/ui.js"></script>
+<!--/SCRIPTS-->
+</body>
+</html>

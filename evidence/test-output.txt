@@ -1,0 +1,29 @@
+PASS  T1   valid free interval -> Available
+PASS  T2   overlap with existing booking -> Unavailable
+PASS  T3   blocked room -> Unavailable
+PASS  T4   duration = 0 -> validation error
+PASS  T5   duration = 121 -> validation error
+PASS  T6   past start time -> validation error
+PASS  T7   adjacent non-overlapping interval -> Available
+PASS  T8   booking data unchanged after checks
+PASS  U1   duration 120 is accepted (upper bound)
+PASS  U2   duration 1 is accepted (lower bound)
+PASS  U3   negative duration rejected
+PASS  U4   non-numeric duration rejected
+PASS  U5   decimal duration rejected
+PASS  U6   empty start rejected
+PASS  U7   impossible date rejected
+PASS  U8   start equal to now rejected
+PASS  U9   interval ending exactly at booking start is available
+PASS  U10  interval covering whole booking is unavailable
+PASS  U11  blocked check wins over overlap
+PASS  U12  validation wins over blocked
+PASS  U13  HTML in input is treated as invalid data
+PASS  U14  overlaps() is half-open
+PASS  U15  parseLocal rejects 24:00
+PASS  U16  bookings array is frozen
+PASS  U17  validateRequest throws on invalid clock
+PASS  T8b  booking data still unchanged after all 25 checks
+
+Shared acceptance tests: 8/8
+All tests: 26/26 passed

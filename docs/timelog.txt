@@ -1,0 +1,5 @@
+Code-based track timing (AI-assisted, wall clock, Asia/Almaty, 2026-11-25)
+setup (folders, tooling check): 12:05 - 12:05 (~1 min)
+implementation (4 source files + index.html): 12:05 - 12:06 (~1-2 min)
+testing (node suite + browser UI checks, screenshots): 12:06 - 12:07 (~1-2 min)
+debugging: 0 min (no failing test)

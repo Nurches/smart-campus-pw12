@@ -1,0 +1,174 @@
+[
+ {
+  "view": "desktop",
+  "id": "T1",
+  "start": "2026-12-15T10:30",
+  "dur": "60",
+  "blocked": false,
+  "title": "Available",
+  "msg": "Available: the room is free from 10:30 to 11:30.",
+  "code": "reason code: AVAILABLE"
+ },
+ {
+  "view": "desktop",
+  "id": "T2",
+  "start": "2026-12-15T09:30",
+  "dur": "60",
+  "blocked": false,
+  "title": "Unavailable",
+  "msg": "Unavailable: overlaps existing booking B1 (09:00–10:00).",
+  "code": "reason code: OVERLAP"
+ },
+ {
+  "view": "desktop",
+  "id": "T3",
+  "start": "2026-12-15T10:30",
+  "dur": "60",
+  "blocked": true,
+  "title": "Unavailable",
+  "msg": "Unavailable: the room is blocked and cannot be booked.",
+  "code": "reason code: ROOM_BLOCKED"
+ },
+ {
+  "view": "desktop",
+  "id": "T4",
+  "start": "2026-12-15T10:30",
+  "dur": "0",
+  "blocked": false,
+  "title": "Please fix the input",
+  "msg": "Duration must be greater than 0 and at most 120 minutes (you entered 0).",
+  "code": "reason code: DURATION_OUT_OF_RANGE"
+ },
+ {
+  "view": "desktop",
+  "id": "T5",
+  "start": "2026-12-15T10:30",
+  "dur": "121",
+  "blocked": false,
+  "title": "Please fix the input",
+  "msg": "Duration must be greater than 0 and at most 120 minutes (you entered 121).",
+  "code": "reason code: DURATION_OUT_OF_RANGE"
+ },
+ {
+  "view": "desktop",
+  "id": "T6",
+  "start": "2026-11-20T10:00",
+  "dur": "60",
+  "blocked": false,
+  "title": "Please fix the input",
+  "msg": "Start time must be in the future.",
+  "code": "reason code: START_NOT_IN_FUTURE"
+ },
+ {
+  "view": "desktop",
+  "id": "T7",
+  "start": "2026-12-15T10:00",
+  "dur": "60",
+  "blocked": false,
+  "title": "Available",
+  "msg": "Available: the room is free from 10:00 to 11:00.",
+  "code": "reason code: AVAILABLE"
+ },
+ {
+  "view": "desktop",
+  "id": "X1",
+  "start": "2026-12-15T10:30",
+  "dur": "<img src=x onerror=alert(1)>",
+  "blocked": false,
+  "title": "Please fix the input",
+  "msg": "Duration must be a whole number of minutes.",
+  "code": "reason code: INVALID_DURATION"
+ },
+ {
+  "view": "desktop",
+  "id": "T8",
+  "unchanged": true,
+  "dialogs": []
+ },
+ {
+  "view": "mobile",
+  "id": "T1",
+  "start": "2026-12-15T10:30",
+  "dur": "60",
+  "blocked": false,
+  "title": "Available",
+  "msg": "Available: the room is free from 10:30 to 11:30.",
+  "code": "reason code: AVAILABLE"
+ },
+ {
+  "view": "mobile",
+  "id": "T2",
+  "start": "2026-12-15T09:30",
+  "dur": "60",
+  "blocked": false,
+  "title": "Unavailable",
+  "msg": "Unavailable: overlaps existing booking B1 (09:00–10:00).",
+  "code": "reason code: OVERLAP"
+ },
+ {
+  "view": "mobile",
+  "id": "T3",
+  "start": "2026-12-15T10:30",
+  "dur": "60",
+  "blocked": true,
+  "title": "Unavailable",
+  "msg": "Unavailable: the room is blocked and cannot be booked.",
+  "code": "reason code: ROOM_BLOCKED"
+ },
+ {
+  "view": "mobile",
+  "id": "T4",
+  "start": "2026-12-15T10:30",
+  "dur": "0",
+  "blocked": false,
+  "title": "Please fix the input",
+  "msg": "Duration must be greater than 0 and at most 120 minutes (you entered 0).",
+  "code": "reason code: DURATION_OUT_OF_RANGE"
+ },
+ {
+  "view": "mobile",
+  "id": "T5",
+  "start": "2026-12-15T10:30",
+  "dur": "121",
+  "blocked": false,
+  "title": "Please fix the input",
+  "msg": "Duration must be greater than 0 and at most 120 minutes (you entered 121).",
+  "code": "reason code: DURATION_OUT_OF_RANGE"
+ },
+ {
+  "view": "mobile",
+  "id": "T6",
+  "start": "2026-11-20T10:00",
+  "dur": "60",
+  "blocked": false,
+  "title": "Please fix the input",
+  "msg": "Start time must be in the future.",
+  "code": "reason code: START_NOT_IN_FUTURE"
+ },
+ {
+  "view": "mobile",
+  "id": "T7",
+  "start": "2026-12-15T10:00",
+  "dur": "60",
+  "blocked": false,
+  "title": "Available",
+  "msg": "Available: the room is free from 10:00 to 11:00.",
+  "code": "reason code: AVAILABLE"
+ },
+ {
+  "view": "mobile",
+  "id": "X1",
+  "start": "2026-12-15T10:30",
+  "dur": "<img src=x onerror=alert(1)>",
+  "blocked": false,
+  "title": "Please fix the input",
+  "msg": "Duration must be a whole number of minutes.",
+  "code": "reason code: INVALID_DURATION"
+ },
+ {
+  "view": "mobile",
+  "id": "T8",
+  "unchanged": true,
+  "dialogs": []
+ }
+]
